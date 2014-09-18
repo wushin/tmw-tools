@@ -19,7 +19,7 @@ tilesize()
 }
 continent()
 {
-    O="$1".png
+    O="graphics/minimaps/$1".png
     let T_W="$2"
     let T_H="$3"
     let P_W=T_W*TILESIZE
