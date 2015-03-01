@@ -162,14 +162,6 @@ class ContentHandler(xml.sax.ContentHandler):
                 self.warps.write('// %s\n' % MESSAGE)
                 self.warps.write('// %s warps\n\n' % self.name)
 
-            #if name == u'tileset':
-            #    self.tilesets.add(int(attr[u'firstgid']))
-
-            #if name == u'layer' and attr[u'name'].lower().startswith(u'collision'):
-            #    self.width = int(attr[u'width'])
-            #    self.height = int(attr[u'height'])
-                #self.out.write(struct.pack('<HH', self.width, self.height))
-            #    self.state = State.LAYER
         elif self.state is State.LAYER:
             if name == u'data':
                 if attr.get(u'encoding','') not in (u'', u'csv', u'base64', u'xml'):
@@ -181,8 +173,6 @@ class ContentHandler(xml.sax.ContentHandler):
                     return
                 self.compression = attr.get(u'compression','')
                 self.state = State.DATA
-        #elif self.state is State.DATA:
-            #self.out.write(chr(int(attr.get(u'gid',0)) not in self.tilesets))
         elif self.state is State.FINAL:
             if name == u'object':
                 obj_type = attr[u'type'].lower()
@@ -280,18 +270,6 @@ class ContentHandler(xml.sax.ContentHandler):
 
         if name == u'data':
             self.state = State.FINAL
-        #    if self.state is State.DATA:
-        #        if self.encoding == u'csv':
-        #            for x in self.buffer.split(','):
-        #                self.out.write(chr(int(x) not in self.tilesets))
-        #        elif self.encoding == u'base64':
-        #            data = base64.b64decode(str(self.buffer))
-        #            if self.compression == u'zlib':
-        #                data = zlib.decompress(data)
-        #            elif self.compression == u'gzip':
-        #                data = zlib.decompressobj().decompress('x\x9c' + data[10:-8])
-        #            for i in range(self.width*self.height):
-        #                self.out.write(chr(int(struct.unpack('<I',data[i*4:i*4+4])[0]) not in self.tilesets))
 
     def endDocument(self):
         self.mobs.write('\n\n%s,0,0,0\tscript\tMob%s\t-1,{\n    end;\n' % (self.base, self.base))
@@ -315,7 +293,6 @@ class ContentHandler(xml.sax.ContentHandler):
 def main(argv):
     _, client_data, server_data = argv
     tmx_dir = posixpath.join(client_data, CLIENT_MAPS)
-    #wlk_dir = posixpath.join(server_data, SERVER_WLK)
     npc_dir = posixpath.join(server_data, SERVER_NPCS)
     main.name_unique = 0;
     if check_mobs:
@@ -339,7 +316,6 @@ def main(argv):
         if ext == '.tmx':
             map_basenames.append(base)
             tmx = posixpath.join(tmx_dir, arg)
-            #wlk = posixpath.join(wlk_dir, base + '.wlk')
             this_map_npc_dir = posixpath.join(npc_dir, base)
             os.path.isdir(this_map_npc_dir) or os.mkdir(this_map_npc_dir)
             print('Converting %s' % (tmx))
@@ -349,9 +325,14 @@ def main(argv):
                         xml.sax.parse(tmx, ContentHandler(this_map_npc_dir, mobs, warps, imports))
             npc_master.append('import: %s\n' % posixpath.join(SERVER_NPCS, base, NPC_IMPORTS))
 
-    #with open(posixpath.join(wlk_dir, 'resnametable.txt'), 'w') as resname:
-    #    for base in sorted(map_basenames):
-    #        resname.write('%s#%s.wlk#\n' % (base, base))
+    with open('conf/maps.conf', 'w') as resname:
+        for base in sorted(map_basenames):
+            resname.write('map: %s\n' % (base))
+    with open('db/map_index.txt', 'w') as dbindex:
+        mapcount = 1
+        for base in sorted(map_basenames):
+            dbindex.write('%s %d\n' % (base, mapcount))
+            mapcount += 1
     with open(posixpath.join(npc_dir, NPC_MASTER_IMPORTS), 'w') as out:
         out.write('// %s\n\n' % MESSAGE)
         npc_master.sort()
