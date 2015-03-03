@@ -186,10 +186,14 @@ class ContentHandler(xml.sax.ContentHandler):
                 # I know that the x += w/2 is to get centers, though.
                 if obj_type == 'spawn':
                     self.object = Mob()
-                    if w > 1:
-                        w -= 1
-                    if h > 1:
-                        h -= 1
+                    if w == 0:
+                        w = 1
+                    if h == 0:
+                        h = 1
+                    if w > 2:
+                        w = w/2
+                    if h > 2:
+                        h = h/2
                     x += w/2
                     y += h/2
                 elif obj_type == 'warp':
