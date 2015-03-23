@@ -279,7 +279,7 @@ class ContentHandler(xml.sax.ContentHandler):
     def endDocument(self):
         self.mobs.write('\n\n%s,0,0,0\tscript\tMob%s\t-1,{\n    end;\n' % (self.base, self.base))
         for mob_id in sorted(self.mob_ids):
-            self.mobs.write('\nOn%d:\n    @mobId = %d;\n    callfunc "MobPoints";\n    end;\n' % (mob_id, mob_id))
+            self.mobs.write('\nOn%d:\n    if (!playerattached())\n        end;\n    @mobId = %d;\n    callfunc "MobPoints";\n    end;\n' % (mob_id, mob_id))
         self.mobs.write('}\n')
         self.imports.write('// Map %s: %s\n' % (self.base, self.name))
         self.imports.write('// %s\n' % MESSAGE)
